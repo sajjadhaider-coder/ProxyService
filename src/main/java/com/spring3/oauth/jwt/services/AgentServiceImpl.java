@@ -1,6 +1,5 @@
 package com.spring3.oauth.jwt.services;
 
-import com.spring3.oauth.jwt.dtos.ApiResponse;
 import com.spring3.oauth.jwt.dtos.SubAgentListResponse;
 import com.spring3.oauth.jwt.models.UserInfo;
 import com.spring3.oauth.jwt.repositories.AgentRepository;
@@ -38,9 +37,14 @@ public class AgentServiceImpl implements  AgentService {
         return subAgentListResponse;
     }
 
+    @Override
+    public UserInfo getAgentProfile(String userId) {
+        return agentRepository.findAgentProfileByAgentId(Long.valueOf(userId));
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public UserInfo saveAgent(UserInfo user) {
+    public Optional<UserInfo> saveAgent(UserInfo user) {
         {
             if(user.getUsername()== null){
                 throw new RuntimeException("Parameter account number is not found in request..!!");
@@ -48,7 +52,7 @@ public class AgentServiceImpl implements  AgentService {
                 throw new RuntimeException("Parameter password is not found in request..!!");
             }
             Optional<UserInfo> persitedUser = Optional.of(new UserInfo());
-            UserInfo savedUser = null;
+            Optional<UserInfo> savedUser = null;
 
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             String rawPassword = user.getPassword();
@@ -58,11 +62,10 @@ public class AgentServiceImpl implements  AgentService {
             user.setPassword(encodedPassword);
             user.setStatus("Active");
             user.setRoles(null);
-            user.setId(0);
-            try {
-                if (user.getId() > 0) {
-                    Optional<UserInfo> oldUser = agentRepository.findById(user.getId());
-                    oldUser.get().setCreatedBy(String.valueOf(oldUser.get().getUId()));
+             try {
+             /*   if (user.getId() > 0) {
+                    Optional<UserInfo> oldUser = Optional.ofNullable(agentRepository.findAgentProfileByAgentId(user.getId()));
+                    oldUser.get().setCreatedBy(String.valueOf(oldUser.get().getUserId()));
                     if (!oldUser.isEmpty()) {
                         oldUser.get().setId(user.getId());
                         oldUser.get().setPassword(user.getPassword());
@@ -70,24 +73,60 @@ public class AgentServiceImpl implements  AgentService {
                         oldUser.get().setVerificationCode(user.getVerificationCode());
                         oldUser.get().setUpdatedAt(LocalDateTime.now());
                         oldUser.get().setDeviceType(user.getDeviceType());
-                        oldUser.get().setUpdatedBy(String.valueOf(oldUser.get().getUId()));
+                        oldUser.get().setUpdatedBy(String.valueOf(oldUser.get().getUserId()));
                         oldUser.get().setRoles(user.getRoles());
-                        savedUser = agentRepository.save(oldUser.get());
-                        persitedUser = agentRepository.findById(savedUser.getId());
+                        savedUser = Optional.of(agentRepository.save(oldUser.get()));
+                        savedUser.get().setId(savedUser.get().getUserId());
+                       // persitedUser = Optional.ofNullable(agentRepository.findAgentProfileByAgentId(savedUser.getId()));
                     } else {
                         throw new RuntimeException("Can't find record with identifier: " + persitedUser.get().getId());
                     }
-                } else {
+                } else {*/
                     user.setCreatedAt(LocalDateTime.now());
-                    user.setUId(user.getUId());
-                    persitedUser = Optional.of(agentRepository.save(user));
-                }
+                    savedUser = Optional.of(agentRepository.save(user));
+               // }
                // persitedUser.get().setUId(String.valueOf(persitedUser.get().getId()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return persitedUser.get();
+            return savedUser;
         }
+    }
+
+    @Override
+    public void deleteAgent(String userId) {
+        UserInfo userInfo = agentRepository.findAgentProfileByAgentId(Long.valueOf(userId));
+        if (userInfo != null) {
+            agentRepository.delete(userInfo);
+        }
+    }
+
+    @Override
+    public UserInfo updateAgentInfo(UserInfo user) {
+        Optional<UserInfo> persitedUser = Optional.of(new UserInfo());
+        UserInfo savedUser = null;
+
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String rawPassword = user.getPassword();
+        String encodedPassword = encoder.encode(rawPassword);
+
+        user.setUsername(user.getUsername());
+        user.setPassword(encodedPassword);
+        user.setStatus("Active");
+        UserInfo existingUser = agentRepository.findAgentProfileByAgentId((long) user.getUserId());
+        if (existingUser != null) {
+            existingUser.setCreatedBy(String.valueOf(existingUser.getUserId()));
+            //existingUser.setId(user.getId());
+            existingUser.setPassword(user.getPassword());
+            existingUser.setUsername(user.getUsername());
+            existingUser.setVerificationCode(user.getVerificationCode());
+            existingUser.setUpdatedAt(LocalDateTime.now());
+            existingUser.setDeviceType(user.getDeviceType());
+            existingUser.setUpdatedBy(String.valueOf(existingUser.getUserId()));
+            existingUser.setRoles(null);
+            savedUser = agentRepository.save(existingUser);
+        }
+return savedUser;
     }
 
     public List<UserInfo> getSubAgentListFromUserService(String parentId, String jwtToken) {

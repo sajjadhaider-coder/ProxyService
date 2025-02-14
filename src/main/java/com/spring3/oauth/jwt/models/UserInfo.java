@@ -53,8 +53,8 @@ public class UserInfo {
     @Column(name = "CREATED_BY")
     private String createdBy;
 
-    @Column(name = "UID")
-    private String uId;
+    @Column(name = "USER_ID", nullable = false)
+    private int userId;
 
     @Column(name = "UPDATED_AT")
     private LocalDateTime updatedAt;

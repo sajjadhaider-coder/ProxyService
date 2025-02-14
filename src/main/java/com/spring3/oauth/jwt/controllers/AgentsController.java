@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/agent")
@@ -38,11 +39,42 @@ public class AgentsController {
         }
         return new ResponseEntity<>(response, HttpStatusCode.valueOf(statusCode));
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/getAgentProfile/{userId}")
+    public  ResponseEntity<ApiResponse> getAgentProfile(@PathVariable String userId) {
+        int statusCode = 0;
+        ApiResponse response = null;
+        try {
+            statusCode = HttpStatus.OK.value();
+            UserInfo agentProfile = agentService.getAgentProfile(userId);
+            response = new ApiResponse<>(HttpStatus.OK.value(), "SUCCESS", agentProfile);
+        } catch(Exception e) {
+            statusCode = HttpStatus.UNAUTHORIZED.value();
+            response = new ApiResponse<>(HttpStatus.UNAUTHORIZED.value(), "FAILURE", null);
+        }
+        return new ResponseEntity<>(response, HttpStatusCode.valueOf(statusCode));
+    }
+
+    @PostMapping("/updateAgentProfile")
+    public  ResponseEntity<ApiResponse> updateAgentProfile(@RequestBody UserInfo userInfo) {
+        int statusCode = 0;
+        ApiResponse response = null;
+        try {
+            statusCode = HttpStatus.OK.value();
+            UserInfo agentProfile = agentService.updateAgentInfo(userInfo);
+            response = new ApiResponse<>(HttpStatus.OK.value(), "SUCCESS", agentProfile);
+        } catch(Exception e) {
+            statusCode = HttpStatus.UNAUTHORIZED.value();
+            response = new ApiResponse<>(HttpStatus.UNAUTHORIZED.value(), "FAILURE", null);
+        }
+        return new ResponseEntity<>(response, HttpStatusCode.valueOf(statusCode));
+    }
     @PostMapping(value = "/addAgent")
     public ResponseEntity<ApiResponse> saveUser(@RequestBody UserInfo userRequest) {
         ApiResponse apiResponse = null;
         int statusCode = 0;
-        UserInfo userResponse = null;
+        Optional<UserInfo> userResponse = null;
         try {
             userResponse = agentService.saveAgent(userRequest);
             statusCode = HttpStatus.OK.value();
