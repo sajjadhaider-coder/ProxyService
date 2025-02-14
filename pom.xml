@@ -101,6 +101,6 @@
                 </configuration>
             </plugin>
         </plugins>
-        <finalName>us</finalName>
+        <finalName>proxy</finalName>
     </build>
 </project>
