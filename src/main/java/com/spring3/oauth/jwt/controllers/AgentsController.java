@@ -86,4 +86,20 @@ public class AgentsController {
             return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PostMapping("/deleteAgent/{userId}")
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable("userId") String userId){
+        int statusCode = 0;
+        ApiResponse response = null;
+        Boolean isDeleted = agentService.deleteAgent(String.valueOf((userId)));
+        if (!isDeleted) {
+            statusCode = HttpStatus.NOT_FOUND.value();
+            response = new ApiResponse<>(HttpStatus.NOT_FOUND.value(), "FAILED", null);
+            throw new UserNotFoundException("User not found.");
+        } else {
+            statusCode = HttpStatus.OK.value();
+            response = new ApiResponse<>(HttpStatus.OK.value(), "Success", null);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

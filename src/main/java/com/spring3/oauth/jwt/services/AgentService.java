@@ -11,6 +11,6 @@ public interface AgentService  {
     UserInfo getAgentProfile(String userId);
     Optional<UserInfo> saveAgent(UserInfo userInfo);
 
-    void deleteAgent(String  userId);
+    Boolean deleteAgent(String  userId);
     UserInfo updateAgentInfo(UserInfo userInfo);
 }

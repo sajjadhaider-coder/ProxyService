@@ -94,11 +94,14 @@ public class AgentServiceImpl implements  AgentService {
     }
 
     @Override
-    public void deleteAgent(String userId) {
+    public Boolean deleteAgent(String userId) {
+        Boolean deleted = false;
         UserInfo userInfo = agentRepository.findAgentProfileByAgentId(Long.valueOf(userId));
         if (userInfo != null) {
             agentRepository.delete(userInfo);
+            deleted = true;
         }
+        return deleted;
     }
 
     @Override
