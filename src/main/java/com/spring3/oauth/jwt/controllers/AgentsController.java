@@ -5,6 +5,7 @@ import com.spring3.oauth.jwt.dtos.SubAgentListResponse;
 import com.spring3.oauth.jwt.exceptions.UserNotFoundException;
 import com.spring3.oauth.jwt.models.UserInfo;
 import com.spring3.oauth.jwt.services.AgentService;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -57,6 +58,7 @@ public class AgentsController {
         return new ResponseEntity<>(response, HttpStatusCode.valueOf(statusCode));
     }
 
+   @Hidden
     @PostMapping("/updateAgentProfile")
     public  ResponseEntity<ApiResponse> updateAgentProfile(@RequestBody UserInfo userInfo) {
         int statusCode = 0;
@@ -71,6 +73,8 @@ public class AgentsController {
         }
         return new ResponseEntity<>(response, HttpStatusCode.valueOf(statusCode));
     }
+
+    @Hidden
     @PostMapping(value = "/addAgent")
     public ResponseEntity<ApiResponse> saveUser(@RequestBody UserInfo userRequest) {
         ApiResponse apiResponse = null;
@@ -88,6 +92,7 @@ public class AgentsController {
         }
     }
 
+    @Hidden
     @PostMapping("/deleteAgent/{userId}")
     public ResponseEntity<ApiResponse> deleteUser(@PathVariable("userId") String userId){
         int statusCode = 0;
